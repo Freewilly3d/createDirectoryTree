@@ -4,6 +4,11 @@ import argparse
 from datetime import datetime
 
 def organize_by_creation_date(src_folder, dst_folder, date_format, ignore_duplicates=True):
+    # Validate source folder
+    if not os.path.isdir(src_folder):
+        raise FileNotFoundError(f"Source folder does not exist: {src_folder}")
+
+    # Ensure destination exists
     os.makedirs(dst_folder, exist_ok=True)
 
     for root, dirs, files in os.walk(src_folder):
@@ -11,13 +16,14 @@ def organize_by_creation_date(src_folder, dst_folder, date_format, ignore_duplic
             src_path = os.path.join(root, filename)
 
             try:
-                # Get Windows creation time
+                # Get Windows file creation time
                 creation_timestamp = os.path.getctime(src_path)
                 creation_date = datetime.fromtimestamp(creation_timestamp)
 
-                # Use strftime format string
+                # Use strftime format string for folder naming
                 folder_name = creation_date.strftime(date_format)
 
+                # Create target subfolder if missing
                 target_folder = os.path.join(dst_folder, folder_name)
                 os.makedirs(target_folder, exist_ok=True)
 
@@ -28,6 +34,7 @@ def organize_by_creation_date(src_folder, dst_folder, date_format, ignore_duplic
                     print(f"Duplicate skipped: {dst_path}")
                     continue
 
+                # Copy file with metadata
                 shutil.copy2(src_path, dst_path)
                 print(f"Copied: {src_path} → {dst_path}")
 
@@ -49,7 +56,7 @@ def main():
         help=(
             "strftime-compatible folder name format. "
             'Example: "%Y_%m", "%Y-%m-%d", "%Y", "%b_%Y". '
-            "Default is %Y_%m"
+            "Default: %Y_%m"
         )
     )
 
