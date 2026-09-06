@@ -17,10 +17,14 @@ def organize_by_creation_date(src_folder, dst_folder, date_format, ignore_duplic
 
             try:
                 # Get Windows file creation time
-                creation_timestamp = os.path.getctime(src_path)
-                creation_date = datetime.fromtimestamp(creation_timestamp)
+                creation_timestamp = os.stat(src_path).st_ctime
+                creation_timestamp2 = os.stat(src_path).st_mtime
 
+                creation_date = datetime.fromtimestamp(creation_timestamp)
+                creation_date2 = datetime.fromtimestamp(creation_timestamp2)
                 # Use strftime format string for folder naming
+                if creation_date > creation_date2:
+                    creation_date = creation_date2
                 folder_name = creation_date.strftime(date_format)
 
                 # Create target subfolder if missing
@@ -53,10 +57,11 @@ def main():
     parser.add_argument(
         "--date-format",
         default="%Y_%m",
-        help=(
-            "strftime-compatible folder name format. "
-            'Example: "%Y_%m", "%Y-%m-%d", "%Y", "%b_%Y". '
-            "Default: %Y_%m"
+        help=('''strftime-compatible folder name format. 
+            Examples: %%Y_%%m, %%Y-%%m-%%d, %%Y, %%b_%%Y. 
+            Default: %%Y_%%m
+        
+            '''
         )
     )
 
