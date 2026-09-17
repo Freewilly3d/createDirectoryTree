@@ -4,6 +4,7 @@ import argparse
 from datetime import datetime
 from PIL import Image
 
+
 def get_date_taken(image_path):
     try:
         with Image.open(image_path) as img:
@@ -18,7 +19,7 @@ def get_date_taken(image_path):
         print(f"Error: {e}")
     return None
 
-def organize_by_creation_date(src_folder, dst_folder, ignore_duplicates=True):
+def organize_by_creation_date(src_folder, dst_folder, ignore_duplicates=True,print_debug=False):
     if not os.path.isdir(src_folder):
         raise FileNotFoundError(f"Source folder does not exist: {src_folder}")
 
@@ -44,7 +45,7 @@ def organize_by_creation_date(src_folder, dst_folder, ignore_duplicates=True):
                 temp = src_path.split('\\')
                 if temp[1] > '2000' and temp[1] < '3000':
                     temp2 = temp[3].replace('-','_')
-                elif temp[0] > '2000' and temp[1] < '3000':
+                elif temp[0] > '2000' and temp[0] < '3000':
                     temp2 = temp[2].replace('-','_')
                 date_format = "%Y_%m_%d"
                 file_date = datetime.strptime(temp2.split(' ')[0], date_format)
@@ -56,7 +57,8 @@ def organize_by_creation_date(src_folder, dst_folder, ignore_duplicates=True):
                     day_folder = date_obj.strftime("%d")
                     new_path = os.path.join(year_folder, year_folder + "_" + month_folder,
                                             year_folder + "_" + month_folder + "_" + day_folder)
-                 #   print(f"Date taken: {new_path}")
+                    if print_debug:
+                        print(f"Date taken: {new_path}")
 
                 else:
                     if src_path.split('\\')[0] > '2000' and src_path.split('\\')[0] < '3000' :
@@ -65,26 +67,31 @@ def organize_by_creation_date(src_folder, dst_folder, ignore_duplicates=True):
                             temp = '\\'.join(templist[0:2])
                             tempday = templist[2].split(' ')[0]
                             new_path = os.path.join(temp, tempday.repalace('-', '_'))
-                  #          print(f"Date src date [0] file year folder: {new_path}")
+                            if print_debug:
+                                print(f"Date src date [0] file year folder: {new_path}")
                         else:
                             new_path = os.path.join(w_year_folder, w_year_folder + "_" + w_month_folder,
                                                     w_year_folder + "_" + w_month_folder + "_" + w_day_folder)
-                   #         print(f"Date src date [0] <= file year folder: {new_path}")
+                            if print_debug:
+                                print(f"Date src date [0] <= file year folder: {new_path}")
                     elif src_path.split('\\')[1] > '2000' and src_path.split('\\')[1] < '3000':
                         if src_path.split('\\')[1] < w_year_folder:
                             templist = src_path.split('\\')
                             temp = '\\'.join(templist[1:3])
                             tempday = templist[3].split(' ')[0]
                             new_path = os.path.join(temp , tempday.replace('-','_'))
-                    #        print(f"Date src date [1] file year folder: {new_path}")
+                            if print_debug:
+                                print(f"Date src date [1] file year folder: {new_path}")
                         else:
                             new_path = os.path.join(w_year_folder, w_year_folder + "_" + w_month_folder,
                                                     w_year_folder + "_" + w_month_folder + "_" + w_day_folder)
-                     #       print(f"Date src date [1] <= file year folder: {new_path}")
+                            if print_debug:
+                                print(f"Date src date [1] <= file year folder: {new_path}")
                     else:
                         new_path = os.path.join(w_year_folder, w_year_folder + "_" + w_month_folder,
                                                 w_year_folder + "_" + w_month_folder + "_" + w_day_folder)
-                        print(f"Date else {new_path}")
+                        if print_debug:
+                            print(f"Date else {new_path}")
 
 
                 foldertext = ""
@@ -115,7 +122,8 @@ def organize_by_creation_date(src_folder, dst_folder, ignore_duplicates=True):
                 shutil.copy2(src_path, dst_path)
                 #original_stat = os.stat(src_path)
                 #os.utime(dst_path, (original_stat.st_atime, original_stat.st_mtime))
-                print(f"Copied: {src_path} → {dst_path}")
+                if print_debug:
+                    print(f"Copied: {src_path} → {dst_path}")
 
             except Exception as e:
                 print(f"Error processing {src_path}: {e}")
@@ -138,6 +146,12 @@ def main():
         help="Destination directory."
     )
 
+
+    parser.add_argument(
+        "-p", "--print-debug",
+        action="store_true",
+        help="printed Debug."
+    )
     parser.add_argument(
         "-i", "--ignore-duplicates",
         action="store_true",
@@ -149,7 +163,8 @@ def main():
     organize_by_creation_date(
         src_folder=args.source,
         dst_folder=args.destination,
-        ignore_duplicates=args.ignore_duplicates
+        ignore_duplicates=args.ignore_duplicates,
+        print_debug = args.print_debug
     )
 
 
